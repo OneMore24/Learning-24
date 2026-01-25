@@ -1,19 +1,24 @@
 #ifndef __ARRAY_H__
 #define __ARRAY_H__
+#include <stddef.h>
 
-// crear clase Carray
+/*
+usa size_t -> esta en la libreria <stddef.h> -> es un tipo de variable que mide cosas en memoria, nunca puede ser negativo
+value_type "remplaza" int -> cuando se necesite modificar el tipo de variable solo se cambia en una linea
+*/
+
+using value_type = int;
+
 class CArray{
-    //crear atributos privados y publicos
     private:
-        int m_size; //declarar tamaño del array como entero
-        int  m_data[100]; //tamaño declarado/estatico
+        size_t m_size; 
+        value_type m_data[100]; 
     public:
-        CArray(int size); //constructor
-        ~CArray(); //destructr
-        
-    //metodos para devolver direccion de memoria y el tamaño del array
-    int& operator[](int index);
-    int getSize() const;
+        CArray(size_t size); 
+        ~CArray(); 
+
+    value_type& operator[](size_t index);
+    size_t getSize() const;
 };
 
 void DemoArray();

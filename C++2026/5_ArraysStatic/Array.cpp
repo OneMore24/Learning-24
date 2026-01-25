@@ -3,8 +3,13 @@ using namespace std;
 
 #include "Array.h"
 
-//llamar al contructor para que construya un objeto
-CArray::CArray(int size){
+/*
+quitar el uso de variable nativas -int- y "remplazar" por -value_type-
+usar size_t cuando se devuelve un valor o se indica un index que este en memoria, ya que no puede ser negativo
+en el FOR en lugar de int i (nativo) se usa AUTO i ...
+*/
+
+CArray::CArray(size_t size){
     m_size = size;
 }
 
@@ -12,20 +17,23 @@ CArray::~CArray(){
     //delete[] m_data;
 }
 
-int& CArray::operator[](int index){
+value_type& CArray::operator[](size_t index){
     return m_data[index];
 }
 
-int CArray::getSize() const{
+size_t CArray::getSize() const{
     return m_size;
 }
 
 void DemoArray(){
     CArray arr1(7);
-    for(int i=0; i < arr1.getSize(); ++i)
+    /*
+    en el for, i al tratarse de un lugar en el array, tambien se puede usar value_type, lo correcto
+    */
+    for(size_t i=0; i < arr1.getSize(); ++i)
         arr1[i] = i * 11;
 
-    for(int i=0; i < arr1.getSize(); ++i)
+    for(size_t i=0; i < arr1.getSize(); ++i)
         cout << arr1[i] << endl;
 }
 
