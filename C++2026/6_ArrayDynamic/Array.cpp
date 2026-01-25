@@ -27,9 +27,12 @@ size_t CArray::getSize() const{
 
 void DemoArray(){
     CArray arr1(7);
-    for(auto i=0; i < arr1.getSize(); ++i)
+    /*
+    en el for, i al tratarse de un lugar en el array, tambien se puede usar value_type, lo correcto
+    */
+    for(size_t i=0; i < arr1.getSize(); ++i)
         arr1[i] = i * 11;
 
-    for(auto i=0; i < arr1.getSize(); ++i)
+    for(size_t i=0; i < arr1.getSize(); ++i)
         cout << arr1[i] << endl;
 }
