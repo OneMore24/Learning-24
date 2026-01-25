@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./5_ArraysStatic
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./6_ArraysDynamic
 TARGET = Arr.exe
 SRCS = Array.cpp main.cpp
 OBJS = $(SRCS:.cpp=.o)
