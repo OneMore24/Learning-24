@@ -11,14 +11,21 @@ using value_type = int;
 
 class CArray{
     private:
-        size_t m_size; 
-        value_type m_data[100]; 
+    //capacidad real y ultima posicion ocupada, empiezan en 0
+        size_t m_capacity=0, m_last=0;
+    //direccion de memoria donde empieza el array, empieza apuntando a ningun lado
+        value_type *m_data=nullptr;
     public:
         CArray(size_t size); 
         ~CArray(); 
+    // metodo para agregar al final, y crece el tamaño del array si es necesario
+    void push_back(value_type value);
 
     value_type& operator[](size_t index);
     size_t getSize() const;
+
+    // la funcion que hace la mudanza de memoria, deberia ser privada, pero estará en publico
+    void resize(size_t delta=10);
 };
 
 void DemoArray();
