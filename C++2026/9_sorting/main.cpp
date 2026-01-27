@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Array.h"
+#include "../containers/array.h"
 
 int main() {
     std::cout << "Hello!" << std::endl;
