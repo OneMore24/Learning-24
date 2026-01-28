@@ -24,7 +24,16 @@ class CArray{
 
     void resize(size_t delta=10);
     void sort(CompareFunc pComp);
-    void Foreach(void (*pf)(T &, T), T p1);
+
+    //se elimina el puntero a funcion
+    //ahora un template para el foreach
+    template <typename ObjFunc, typename ...Args>
+    void Foreach(ObjFunc of, Args ...args){
+        // of es la funcion que recibe y ...args es el paquete de datos que sigue despues de of
+        for (size_t i=0; i<getSize(); ++i)
+            // compila: ej. si recibe Foreach(Suma, 10, 20), se convierte en: Suma(m_data[i], 10, 20)
+            of(m_data[i], args...);
+    }
 };
 
 template <typename T>
@@ -69,38 +78,6 @@ void CArray<T>::resize(size_t delta){
 template <typename T>
 void CArray<T>::sort(CompareFunc pComp){
     BurbujaRecursivo(m_data, getSize(), pComp);
-}
-
-/* VARIADIC TEMPLATES - Plantillas variadicas, tienen la capacidad de aceptar 
-cualquier cantidad de argumentos de cualquier tipo, es como una funcion sumar infinita 
-Se crea un funcion que acepta infinitos argumentos
-para esto se necesitan 2 partes obligatoriamente
-1 - la que detiene el bucle cuando queda un elemento
-2 - la funcion que procesa los datos y pasar a la siguiente llamada */
-
-// el test solo acepta un unico parametro, se activa cuando solo qued aun elemento, ya no llama a Test de nuevo
-template <typename Q>
-auto Test(Q elem) { return elem;} // solo retorna el elemento que queda
-
-// el test que suma el primero y vuelve a llamar a la funcion y suma el primero que queda y asi ... 
-// auto hace que devuelva el tipo de dato que detecte el compilador
-template <typename Q, typename ...Args>
-auto Test( Q elem, Args ...args){ 
-    // recibe elem (el primero) y "args..." el resto de elementos
-    //suma el primero + el resultado de procesar el resto
-    return elem + Test(args...);
-}
-
-template <typename Q>
-void Suma(Q &elem, Q p1){ elem += p1; }
-
-template <typename Q>
-void Mult(Q &elem, Q p1){ elem *= p1; }
-
-template <typename T>
-void CArray<T>::Foreach(void (*pf)(T &, T), T p1){
-    for (size_t i=0; i<getSize(); ++i)
-        pf(m_data[i], p1);
 }
 
 template <typename T> 

@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -I./12_Variadic -I./algorithms -I./containers -I./general
-TARGET = fore.exe
-SRCS = main.cpp containers/array.cpp
+TARGET = varia.exe
+SRCS = main.cpp DemoArray.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)

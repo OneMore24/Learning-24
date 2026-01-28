@@ -1,8 +1,12 @@
 #include <iostream>
 #include <fstream>
+
 using namespace std;
 
-#include "array.h"
+// agrega librerias luego de mover el archivo ../
+#include "containers/array.h"
+#include "variadic-util.h"
+#include "compareFunc.h"
 
 using T1 = int;
 
@@ -41,20 +45,26 @@ void DemoArray(){
     arr1.sort(&Mayor);
     cout << arr1 << endl;
 
-    arr1.Foreach(&Suma, 7);
+    // INSTANCIACION IMPLICITA
+    /* como foreach acepta ahora un objfunc (cualquier cosa), el compilador se confunde
+    si se pasa solo la direccion de memoria de la funcion, porque la funcion es un template
+    que puede ser muchas cosas
+    al escribir &Suma<int> se le dice al compilador que se quiere especificamente la 
+    version de suma que sea de enteros */
+    arr1.Foreach(&Suma<T1>, 7);
     cout << arr1 << endl;
-    arr1.Foreach(&Mult, 2);
+    arr1.Foreach(&Mult<T1>, 2);
     cout << arr1 << endl;
 
+    using T2 = string;
     CArray<string> arr2(N);
     arr2[2] = "UNMSM";
     arr2[4] = "FC";
     cout << arr2 << endl;
-    arr2.Foreach(&Suma, ".Enero");
+    arr2.Foreach(&Suma<T2>, ".Enero");
     cout << arr2 << endl;
-    cout << endl << "---variadic templates---" << endl;
+    cout << endl << "---variadic method---" << endl;
 
-// implementacion de variadic templates, suma los numero y los string en c/u
     int x = Test(5,3,2);
     cout << x << endl;
     auto r = Test(1,2,3.4,4,5,6,7);
