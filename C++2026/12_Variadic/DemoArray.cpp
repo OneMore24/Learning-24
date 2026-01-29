@@ -3,7 +3,6 @@
 
 using namespace std;
 
-// agrega librerias luego de mover el archivo ../
 #include "containers/array.h"
 #include "variadic-util.h"
 #include "compareFunc.h"
@@ -12,7 +11,9 @@ using T1 = int;
 
 void DemoArray(){
     const int N = 5;
-    CArray<T1> arr1(N);
+    // Trait1<T1>       primero envuelve tu int (T1) dentro del trait
+    // CArray< ... >    luego se pasa ese envoltorio a la clase array.
+    CArray<Trait1<T1>> arr1(N);
 
     for (size_t i=0; i<N; ++i)
         arr1.push_back(i*10);
@@ -45,19 +46,13 @@ void DemoArray(){
     arr1.sort(&Mayor);
     cout << arr1 << endl;
 
-    // INSTANCIACION IMPLICITA
-    /* como foreach acepta ahora un objfunc (cualquier cosa), el compilador se confunde
-    si se pasa solo la direccion de memoria de la funcion, porque la funcion es un template
-    que puede ser muchas cosas
-    al escribir &Suma<int> se le dice al compilador que se quiere especificamente la 
-    version de suma que sea de enteros */
     arr1.Foreach(&Suma<T1>, 7);
     cout << arr1 << endl;
     arr1.Foreach(&Mult<T1>, 2);
     cout << arr1 << endl;
 
     using T2 = string;
-    CArray<string> arr2(N);
+    CArray<Trait1<T2>> arr2(N);
     arr2[2] = "UNMSM";
     arr2[4] = "FC";
     cout << arr2 << endl;
