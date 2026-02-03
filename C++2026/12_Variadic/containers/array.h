@@ -6,22 +6,97 @@
 #include "../algorithms/sorting.h"
 using namespace std;
 
-// definir el trait
-// se crea una estructura -> por defecto es publica y cualquiera puede acceder
-// template <typename _T> recibe el tipo real y se llamara temporalmente _T
-// dentro del struct se guarda el tipo bajo el nombre estandarizado T
 template <typename _T>
 struct Trait1
 {
     using T = _T;
+    using CompareFunc = bool (*)(const T &, const T &);
 };
 
-template<typename Traits> // ahora recibe traits
+template <typename Container>
+class ArrayForwardIterator
+{ private:
+    using value_type  = typename Container::value_type;
+
+    Container  *m_pContainer = nullptr;
+    value_type *m_data       = nullptr;
+    size_t      m_pos        = -1;
+
+  public:
+    ArrayForwardIterator(Container *pContainer, size_t pos=0) 
+         : m_pContainer(pContainer) {
+           m_data = m_pContainer->m_data;
+           m_pos  = pos;
+        }
+    ArrayForwardIterator(ArrayForwardIterator<Container> &another)
+         :  m_pContainer(another.m_pContainer),
+            m_data (another.m_data),
+            m_pos  (another.m_pos)
+    {}
+
+    virtual ~ArrayForwardIterator(){};
+
+    ArrayForwardIterator<Container> &operator++(){
+        if( m_pos < m_pContainer->getSize() )
+            ++m_pos;
+        return *this;
+    }
+
+    bool operator!=(const ArrayForwardIterator<Container> &another){
+        return m_pContainer != another.m_pContainer ||
+               m_pos        != another.m_pos;         
+    }
+
+    value_type &operator*(){
+      return m_data[m_pos];
+    }
+};
+
+// --------------------------------------------------------
+template <typename Container>
+class ArrayBackwardIterator
+{ private:
+    using value_type  = typename Container::value_type;
+
+    Container  *m_pContainer = nullptr;
+    value_type *m_data       = nullptr;
+    size_t      m_pos        = -1;
+  public:
+    ArrayBackwardIterator(Container *pContainer, size_t pos=0) 
+         : m_pContainer(pContainer) {
+           m_data = m_pContainer->m_data;
+           m_pos = pos;
+         }
+    ArrayBackwardIterator(ArrayBackwardIterator<Container> &another)
+         :  m_pContainer(another.m_pContainer),
+            m_data (another.m_data),
+            m_pos  (another.m_pos)
+    {}
+    virtual ~ArrayBackwardIterator(){};
+    ArrayBackwardIterator<Container> &operator++(){
+        if( m_pos > -1 )
+            --m_pos;
+        return *this;
+    }
+    bool operator!=(const ArrayBackwardIterator<Container> &another){
+        return m_pContainer != another.m_pContainer ||
+               m_pos        != another.m_pos;         
+    }
+    value_type &operator*(){
+      return m_data[m_pos];
+    }
+};
+
+// --------------------------------------------------------
+template<typename Traits> 
 class CArray{
-    // extraemos el tipo, typename es obligatorio para decirle que es un tipo de dato
-    using value_type = typename Traits::T;
-    using CompareFunc = bool (*)(const value_type &, const value_type &);
-    
+    using value_type  = typename Traits::T;
+    using CompareFunc = typename Traits::CompareFunc;
+    using  forward_iterator  = ArrayForwardIterator < CArray<Traits> >;
+    friend forward_iterator;
+    using  backward_iterator = ArrayBackwardIterator< CArray<Traits> >;
+    friend backward_iterator;
+
     private:
         size_t m_capacity=0, m_last=0;
         value_type *m_data=nullptr;
@@ -38,12 +113,30 @@ class CArray{
     void resize(size_t delta=10);
     void sort(CompareFunc pComp);
 
+    forward_iterator begin()
+    { return forward_iterator(this);  }
+    forward_iterator end()
+    { return forward_iterator(this, getSize());  }
+
+    backward_iterator rbegin()
+    { return backward_iterator(this, getSize()-1);  }
+    backward_iterator rend()
+    { return backward_iterator(this, -1);  }
+
     template <typename ObjFunc, typename ...Args>
-    void Foreach(ObjFunc of, Args ...args){
-        for (size_t i=0; i<getSize(); ++i)
-            of(m_data[i], args...);
+    void Foreach(ObjFunc of, Args... args){
+        ::Foreach(*this, of, args...);
+        // for (auto i = 0; i < getSize(); ++i)
+        //     of(m_data[i], args...);
+    }
+
+    template <typename ObjFunc, typename ...Args>
+    auto FirstThat(ObjFunc of, Args... args){
+        return ::FirstThat(*this, of, args...);
     }
 };
+
+// ----------------------------------------------------------------
 
 template <typename Traits>
 CArray<Traits>::CArray(size_t size){
@@ -55,7 +148,7 @@ template <typename Traits>
 CArray<Traits>::~CArray(){ delete[] m_data; }
 
 template <typename Traits>
-typename CArray<Traits>::value_type& CArray<Traits>::operator[](size_t index){   
+typename CArray<Traits>::value_type &CArray<Traits>::operator[](size_t index){   
     if (index >= m_capacity){
         cout << "Cambiar el tamaño de " << m_capacity << " a " << index + 5 << endl;
         resize(index-m_last+5); 

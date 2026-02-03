@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 using namespace std;
 
@@ -8,6 +9,13 @@ using namespace std;
 #include "compareFunc.h"
 
 using T1 = int;
+
+bool Mult7(T1 &elem){
+  return elem%7 == 0;
+}
+
+template <typename Q>
+void Print(Q &elem){    cout << elem << ",";     }
 
 void DemoArray(){
     const int N = 5;
@@ -50,6 +58,19 @@ void DemoArray(){
     cout << arr1 << endl;
     arr1.Foreach(&Mult<T1>, 2);
     cout << arr1 << endl;
+
+    cout << endl << "Antes del Foreach externo, getSize()=" << arr1.getSize() << endl;
+    Foreach(arr1, &IncBasico<T1>);
+    cout << arr1 << endl;
+    cout << "Terminó #1" << endl << endl;
+
+    ::Foreach(arr1, &Print<T1>);                        cout << endl;
+    ::Foreach(arr1.begin(),  arr1.end(),  &Print<T1>);  cout << endl;
+    cout << "Terminó #2" << endl << endl; 
+
+    auto iter = arr1.FirstThat( &Mult7 ); 
+    if( iter != arr1.end() )
+    {   cout << "El primer multiplo de 7 es: " << *iter << endl; }
 
     using T2 = string;
     CArray<Trait1<T2>> arr2(N);
