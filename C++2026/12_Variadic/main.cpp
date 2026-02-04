@@ -1,8 +1,8 @@
 #include <iostream>
-#include "../containers/array.h"
+#include "../containers/lists.h"
 
 int main() {
     std::cout << "Hello!" << std::endl;
-    DemoArray();
+    DemoLists();
     return 0;
 }

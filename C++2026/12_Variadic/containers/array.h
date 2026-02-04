@@ -3,6 +3,7 @@
 #include <iostream>
 #include <assert.h>
 #include <stddef.h>
+
 #include "../algorithms/sorting.h"
 #include "GeneralIterator.h"
 
@@ -71,8 +72,8 @@ class CArray {
         }
         bool operator==(const Node &another) const
         { return m_value == another.GetValue();   }
-        bool operator<(const Node &another)  const
-        { return m_value <  another.GetValue();   }
+        bool operator<(const Node &another) const
+        { return m_value < another.GetValue();   }
     };
     //using  CompareFunc = Traits::CompareFunc
     using  CompareFunc = bool (*)(const Node &, const Node &);
@@ -111,11 +112,11 @@ class CArray {
     auto FirstThat(ObjFunc of, Args... args){
         return ::FirstThat(*this, of, args...);
     }
-    friend ostream &operator<<(ostream &os, CArray<Traits> &arr){
-        os << "CArray: size = " << arr.getSize() << endl;
+    friend ostream &operator<<(ostream &os, CArray<Traits> &container){
+        os << "CArray: size = " << container.getSize() << endl;
         os << "[";
-        for (auto i = 0; i < arr.getSize(); ++i)
-          os << "(" << arr.m_data[i].GetValue() << ":" << arr.m_data[i].GetRef() << "),";
+        for (auto i = 0; i < container.getSize(); ++i)
+          os << "(" << container.m_data[i].GetValue() << ":" << container.m_data[i].GetRef() << "),";
         os << "]" << endl;
         return os;
     }
@@ -124,7 +125,7 @@ class CArray {
 template <typename Traits>
 CArray<Traits>::CArray(Size size) {
   m_capacity = size;
-  m_data = new Node[size]{};
+  m_data = new Node[size];
 }
 template <typename Traits>
 CArray<Traits>::~CArray() { delete[] m_data; }
@@ -152,7 +153,7 @@ void CArray<Traits>::push_back(value_type value, ref_type ref) {
 template <typename Traits>
 void CArray<Traits>::resize(Size delta) {
     Size new_capacity = m_capacity + delta;
-    Node *new_data = new Node[new_capacity]{};
+    Node *new_data = new Node[new_capacity];
     for (auto i = 0; i < m_capacity; ++i)
       new_data[i] = m_data[i];
     delete[] m_data;
@@ -162,7 +163,7 @@ void CArray<Traits>::resize(Size delta) {
 
 template <typename Traits>
 void CArray<Traits>::sort( CompareFunc pComp ){
-    BurbujaRecursivo(m_data, getSize(), pComp);
+    BurbujaRecursivo(m_data, m_last+1, pComp);
 }
 
 // template <typename Traits>
