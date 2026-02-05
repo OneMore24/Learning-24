@@ -2,12 +2,11 @@
 #define __ARRAY_H__
 #include <iostream>
 #include <assert.h>
+using namespace std;
 #include <stddef.h>
-
 #include "../algorithms/sorting.h"
 #include "GeneralIterator.h"
 
-using namespace std;
 template <typename _T>
 struct Trait1
 {
@@ -154,7 +153,7 @@ template <typename Traits>
 void CArray<Traits>::resize(Size delta) {
     Size new_capacity = m_capacity + delta;
     Node *new_data = new Node[new_capacity];
-    for (auto i = 0; i < m_capacity; ++i)
+    for (size_t i = 0; i < m_capacity; ++i)
       new_data[i] = m_data[i];
     delete[] m_data;
     m_data = new_data;
