@@ -79,7 +79,8 @@ private:
         os << "CLinkedList: size = " << container.getSize() << endl;
         os << "[";
         for (size_t i = 0; i < container.getSize(); ++i){
-            // os << "(" << arr.m_data[i].GetValue() << ":" << arr.m_data[i].GetRef() << "),";
+            os << "(" << container.m_pRoot->GetValue() << ":" << container.m_pRoot->GetRef() << "),";
+            container.m_pRoot = container.m_pRoot->GetNext();
         }
         os << "]" << endl;
         return os;
