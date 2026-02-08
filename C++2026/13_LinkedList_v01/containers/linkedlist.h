@@ -34,7 +34,7 @@ private:
 public:
     NodeLinkedList(){}
     NodeLinkedList( value_type _value, ref_type _ref = -1, Node *_pNext = nullptr)
-    : m_data(_value), m_ref(_ref), m_pNext(_pNext){   }
+                  : m_data(_value), m_ref(_ref), m_pNext(_pNext){   }
     value_type  GetValue   () const { return m_data; }
     value_type &GetValueRef() { return m_data; }
 
@@ -78,9 +78,11 @@ private:
     friend ostream &operator<<(ostream &os, CLinkedList<Traits> &container){
         os << "CLinkedList: size = " << container.getSize() << endl;
         os << "[";
+        Node *pTemp = container.m_pRoot;
         for (size_t i = 0; i < container.getSize(); ++i){
-            os << "(" << container.m_pRoot->GetValue() << ":" << container.m_pRoot->GetRef() << "),";
-            container.m_pRoot = container.m_pRoot->GetNext();
+            os << "(" << pTemp->GetValue() << ":" << pTemp->GetRef() << ")";
+            pTemp = pTemp->GetNext();
+            if(pTemp) os << ",";
         }
         os << "]" << endl;
         return os;
@@ -92,6 +94,8 @@ void CLinkedList<Traits>::push_back(value_type &val, ref_type ref){
     Node *pNewNode = new Node(val, ref);
     if( !m_pRoot )
         m_pRoot = pNewNode;
+    else
+        m_pLast->GetNextRef() = pNewNode;
     m_pLast = pNewNode;
     ++m_nElements;
 }
