@@ -2,7 +2,6 @@
 #define __LINKEDLIST_H__
 #include <iostream>
 #include "../general/types.h"
-#include "../util.h"
 using namespace std;
 
 template <typename T, typename _Func>
