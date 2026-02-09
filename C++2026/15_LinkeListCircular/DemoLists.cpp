@@ -58,4 +58,9 @@ void DemoLists(){
     cout << l4;
     cout << l5;
     cout << "finish #6 move constructor" << endl << endl;
+
+    auto it_ultimo = l3.begin() + (l3.getSize() - 1);
+    if (it_ultimo.m_pNode->GetNext() == l3.begin().m_pNode)
+        cout << "el ultimo apunta al primero. es circular." << endl;
+    cout << "finish #7 linkedlistcircular" << endl << endl;
 }
