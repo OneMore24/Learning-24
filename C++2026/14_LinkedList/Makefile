@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./14_LinkedList_v02 -I./containers -I./general
-TARGET = linkedlist.exe
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./14_LinkedList -I./containers -I./general
+TARGET = list.exe
 SRCS = main.cpp DemoLists.cpp
 OBJS = $(SRCS:.cpp=.o)
 
@@ -18,8 +18,6 @@ run: $(TARGET)
 clean:
 	@if exist $(TARGET) del $(TARGET) 2>nul
 	@if exist *.o del *.o 2>nul
-	@if exist *.txt del *.txt 2>nul
-	@if exist algorithms\*.o del algorithms\*.o 2>nul
 	@if exist containers\*.o del containers\*.o 2>nul
 	@if exist general\*.o del general\*.o 2>nul
 

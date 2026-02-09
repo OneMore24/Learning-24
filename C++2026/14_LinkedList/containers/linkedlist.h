@@ -1,11 +1,13 @@
 #ifndef __LINKEDLIST_H__
 #define __LINKEDLIST_H__
 #include <iostream>
-#include <fstream>
 #include <mutex>
+#include <sstream>
 #include "../general/types.h"
+#include "GeneralIterator.h"
 using namespace std;
 
+//traits
 template <typename T, typename _Func>
 struct ListTrait{
     using value_type = T;
@@ -13,187 +15,194 @@ struct ListTrait{
 };
 
 template <typename T>
-struct AscendingTrait   : public ListTrait<T, std::greater<T> >{};
+struct AscendingTrait : public ListTrait<T, std::greater<T> >{};
 
 template <typename T>
-struct DescendingTrait  : public ListTrait<T, std::less<T> >{};
+struct DescendingTrait : public ListTrait<T, std::less<T> >{};
 
+//iterator
+template <typename Container>
+class LinkedListIterator : public GeneralIterator<Container>{
+    using Parent = GeneralIterator<Container>;
+    using Node   = typename Container::Node;
+public:
+    LinkedListIterator(Container *pContainer, Node *pNode)
+                      : Parent(pContainer, pNode){}
+    LinkedListIterator(LinkedListIterator<Container> &another)
+                      : Parent(another){}
+
+    LinkedListIterator<Container> &operator++(){
+        if(Parent::m_pNode)
+            Parent::m_pNode = Parent::m_pNode->GetNext();
+        return *this;
+    }
+};
+
+// nodo
 template <typename Traits>
 class NodeLinkedList{
-    using  value_type  = typename Traits::value_type;
-    using  Node        = NodeLinkedList<Traits>;
+    using  value_type       = typename Traits::value_type;
+    using  Node             = NodeLinkedList<Traits>;
 
 private:
-    value_type  m_data;
-    ref_type    m_ref;
-    Node       *m_pNext = nullptr;
+    value_type m_data;
+    ref_type   m_ref;
+    Node *m_pNext = nullptr;
 
 public:
     NodeLinkedList(){}
     NodeLinkedList( value_type _value, ref_type _ref = -1, Node *_pNext = nullptr)
-                : m_data(_value), m_ref(_ref), m_pNext(_pNext){   }
+                  : m_data(_value), m_ref(_ref), m_pNext(_pNext){   }
+    value_type  GetValue   () const { return m_data; }
+    value_type &GetValueRef() { return m_data; }
 
-    value_type  GetValue    () const { return m_data;  }
-    value_type &GetValueRef ()       { return m_data;  }
+    ref_type    GetRef     () const { return m_ref;   }
+    ref_type   &GetRefRef  () { return m_ref;   }
 
-    ref_type    GetRef      () const { return m_ref;   }
-    ref_type   &GetRefRef   ()       { return m_ref;   }
-
-    Node      * GetNext     () const { return m_pNext; }
-    Node      *&GetNextRef  ()       { return m_pNext; }
+    Node      * GetNext     () const { return m_pNext;   }
+    Node      *&GetNextRef  () { return m_pNext;   }
 
     Node &operator=(const Node &another){
-        m_data  = another.GetValue();
+        m_data = another.GetValue();
         m_ref   = another.GetRef();
         return *this;
     }
-
-    bool operator==(const Node &another) const  { return m_data == another.GetValue();  }
-    bool operator< (const Node &another) const  { return m_data <  another.GetValue();  }
+    bool operator==(const Node &another) const
+    { return m_data == another.GetValue();   }
+    bool operator<(const Node &another) const
+    { return m_data < another.GetValue();   }
 };
 
-template <typename Container>
-class LinkedListForwardIterator{
-public:
-    using value_type  = typename Container::value_type;
-    using Node        = typename Container::Node;
-
-private:
-    Container  *m_pContainer = nullptr;
-    Node       *m_pNode       = nullptr;
-
-public:
-    LinkedListForwardIterator(Container *pContainer, Node *pNode = nullptr)
-                            : m_pContainer(pContainer), m_pNode(pNode){}
-    LinkedListForwardIterator(LinkedListForwardIterator<Container> &another)
-                            : m_pContainer(another.m_pContainer), m_pNode(another.m_pNode){}
-
-    value_type &operator*() { return m_pNode->GetValueRef(); }
-
-    LinkedListForwardIterator<Container> &operator++(){
-        if( m_pNode )
-            m_pNode = m_pNode->GetNext();
-        return *this;
-    }
-
-    bool operator!=(const LinkedListForwardIterator &another) const { return m_pNode != another.m_pNode; }
-    bool operator==(const LinkedListForwardIterator &another) const { return m_pNode == another.m_pNode; }
-};
-
+//lista enlazada
 template <typename Traits>
 class CLinkedList {
     using  value_type       = typename Traits::value_type;
     using  Node             = NodeLinkedList<Traits>;
-    using  forward_iterator = LinkedListForwardIterator<CLinkedList<Traits> >;
+    using forward_iterator  = LinkedListIterator <CLinkedList <Traits> >;
+    
     friend forward_iterator;
+    friend GeneralIterator< CLinkedList<Traits> >;
 
-private:
-    Node   *m_pRoot     = nullptr;
-    Node   *m_pLast     = nullptr;
-    size_t  m_nElements = 0;
-    mutable std::mutex m_mutex;
+    Node *m_pRoot      = nullptr;
+    Node *m_pLast      = nullptr;
+    size_t m_nElements = 0;
+
+    mutable mutex m_mtx;
+    using LOCK = std::lock_guard<std::mutex>;
 
 public:
-
-    CLinkedList()  : m_pRoot(nullptr), m_pLast(nullptr), m_nElements(0) {}
-    CLinkedList(const CLinkedList &another);
-    CLinkedList(CLinkedList &&another) noexcept;
-    virtual ~CLinkedList();
-
-    CLinkedList &operator=(const CLinkedList &another);
-    CLinkedList &operator=(CLinkedList &&another) noexcept;
-
-    value_type       &operator[](size_t index);
-    const value_type &operator[](size_t index) const;
-
-    size_t getSize() const { return m_nElements; }
-
+    CLinkedList(){}
+    //contructor de copia
+    CLinkedList(const CLinkedList<Traits> &another){
+        LOCK lock(another.m_mtx);
+        Node *node_act = another.m_pRoot;
+        for (; node_act; node_act = node_act->GetNext())
+            this->push_back(node_act->GetValue(), node_act->GetRef());
+    }
+    //move contructor
+    CLinkedList(CLinkedList &&another) noexcept{
+        LOCK lock(another.m_mtx);
+        m_pRoot     = another.m_pRoot;
+        m_pLast     = another.m_pLast;
+        m_nElements = another.m_nElements;
+        another.m_pRoot     = nullptr;
+        another.m_pLast     = nullptr;
+        another.m_nElements = 0;
+    }
+    //destructor
+    virtual ~CLinkedList(){
+        Node *node_act = m_pRoot;
+        for(;node_act;){
+            Node *node_next = node_act->GetNext();
+            delete node_act;
+            node_act = node_next;
+        }
+    }
+    //iteradores
     forward_iterator begin() { return forward_iterator(this, m_pRoot); }
     forward_iterator end()   { return forward_iterator(this, nullptr); }
+    //operador de acceso
+    value_type &operator[](size_t index){
+        LOCK lock(m_mtx);
+        Node *node_act = m_pRoot;
+        for (size_t i=0; i<index && node_act; ++i)
+            node_act = node_act->GetNext();
+        if (node_act) return node_act->GetValueRef();
+        throw out_of_range("no existe index");
+    }
 
-
-    void push_back  (const value_type &val, ref_type ref);
-    void Insert     (const value_type &val, ref_type ref);
-
-    template <typename ObjFunc, typename ...Args>
-    void Foreach    (ObjFunc of, Args... args)  { ::Foreach(*this, of, args...); }
-
-    template <typename ObjFunc, typename ...Args>
-    auto FirstThat  (ObjFunc of, Args... args)  { return ::FirstThat(*this, of, args...); }
-
-    friend ostream &operator<<(ostream &os, const CLinkedList<Traits> &container){
-        os << "CLinkedList: size = " << container.m_nElements << endl;
-        os << "[";
-        Node *pTemp = container.m_pRoot;
-        for (size_t i = 0; i<container.getSize(); i++) {
-            os << "(" << pTemp->GetValue() << ":" << pTemp->GetRef() << ")";
-            pTemp = pTemp->GetNext();
-            if (pTemp) os << ","; 
-        } 
-        os << "]" << endl;
-        return os;
-    } 
-
-    friend istream &operator>>(istream &is, CLinkedList<Traits> &container);
+    void    push_back (const value_type &val, ref_type ref);
+    void    Insert    (const value_type &val, ref_type ref);
+    size_t  getSize() { return m_nElements;  }
 
 private:
-    void InternalInsert (Node *&rParent, const value_type &val, ref_type ref);
-    void CopyFrom       (const CLinkedList &another);
-    void Clear          ();
+    void InternalInsert(Node *&rParent, const value_type &val, ref_type ref);
+    //persistencia write
+    friend ostream &operator<<(ostream &os, CLinkedList<Traits> &container){
+        LOCK lock(container.m_mtx);
+        os << "CLinkedList: size = " << container.getSize() << endl;
+        os << "[";
+        Node *node_act = container.m_pRoot;
+        for (;node_act; node_act = node_act->GetNext()){
+            os << "(" << node_act->GetValue() << ":" << node_act->GetRef() << ")";
+            if(node_act->GetNext()) os << ",";
+        }
+        os << "]" << endl;
+        return os;
+    }
+    //persistencia read
+    friend istream &operator>>(istream &is, CLinkedList<Traits> &container) {
+    T2 line;
+    for (; getline(is, line); ) {
+        if (!line.empty() && line[0] == '[') {
+            for (size_t pos = 1; pos < line.length() && line[pos] != ']'; ++pos) {
+                if (line[pos] == '(') {
+                    size_t _value = line.find(':', pos);
+                    size_t _refer = line.find(')', pos);
+            
+                    typename Traits::value_type val;
+                    ref_type ref;
+                    
+                    stringstream(line.substr(pos + 1, _value - pos - 1))       >> val;
+                    stringstream(line.substr(_value + 1, _refer - _value - 1)) >> ref;
+                    
+                    container.push_back(val, ref);
+                    pos = _refer;
+                    }
+                } break;
+            }
+        }
+        return is;
+    }
 };
 
 template <typename Traits>
-CLinkedList<Traits>::CLinkedList(const CLinkedList &another) 
-    : m_pRoot(nullptr), m_pLast(nullptr), m_nElements(0) { CopyFrom(another); }
-
-template <typename Traits>
-CLinkedList<Traits>::~CLinkedList() { Clear(); }
-
-template <typename Traits>
-CLinkedList<Traits> &CLinkedList<Traits>::operator=(const CLinkedList &another){
-    if (this == &another) return *this;
-    Clear();
-    CopyFrom(another);
-    return *this;
+void CLinkedList<Traits>::push_back(const value_type &val, ref_type ref){
+    LOCK lock(m_mtx);
+    Node *pNewNode = new Node(val, ref);
+    if( !m_pRoot )
+        m_pRoot = pNewNode;
+    else
+        m_pLast->GetNextRef() = pNewNode;
+    m_pLast = pNewNode;
+    ++m_nElements;
 }
 
 template <typename Traits>
-CLinkedList<Traits> &CLinkedList<Traits>::operator=(CLinkedList &&another) noexcept {
-    if (this == &another) return *this;
-    Clear();
-
-    m_pRoot             = another.m_pRoot;
-    m_pLast             = another.m_pLast;
-    m_nElements         = another.m_nElements;
-
-    another.m_pRoot     = nullptr;
-    another.m_pLast     = nullptr;
-    another.m_nElements = 0;
-
-    return *this;
-}
-
-template <typename Traits>
-typename CLinkedList<Traits>::value_type &CLinkedList<Traits>::operator[](size_t index) {
-    Node *p_temp = m_pRoot;
-    for (size_t i=0; i<index; ++i)
-        p_temp = p_temp->GetNext();
-    return p_temp->GetValueRef();
-}
-
-template <typename Traits>
-const typename CLinkedList<Traits>::value_type &CLinkedList<Traits>::operator[](size_t index) const {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
-    if (index >= m_nElements) {
-        throw std::out_of_range("Index out of range");
+void CLinkedList<Traits>::InternalInsert(Node *&rParent, const value_type &val, ref_type ref){
+    if( !rParent || rParent->GetValue() > val ){
+        Node *pNew = new Node(val, ref, rParent);
+        rParent = pNew;
+        ++m_nElements;
+        return;
     }
-    
-    Node *current = m_pRoot;
-    for (size_t i = 0; i < index; ++i) {
-        current = current->GetNext();
-    }
-    
-    return current->GetValue();
+    InternalInsert(rParent->GetNextRef(), val, ref);
 }
+
+template <typename Traits>
+void CLinkedList<Traits>::Insert(const value_type &val, ref_type ref){
+    LOCK lock(m_mtx);
+    InternalInsert(m_pRoot, val, ref);
+}
+
 #endif // __LINKEDLIST_H__

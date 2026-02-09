@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../containers/lists.h"
+#include "containers/lists.h"
 
 int main() {
     std::cout << "Hello!" << std::endl;
