@@ -3,6 +3,7 @@
 #include <iostream>
 #include <mutex>
 #include <sstream>
+#include <stdexcept>
 #include "../general/types.h"
 #include "GeneralIterator.h"
 using namespace std;
@@ -77,6 +78,7 @@ public:
 template <typename Traits>
 class CLinkedList {
     using  value_type       = typename Traits::value_type;
+    using Compare           = typename Traits::Func;
     using  Node             = NodeLinkedList<Traits>;
     using forward_iterator  = LinkedListIterator <CLinkedList <Traits> >;
     
@@ -97,7 +99,7 @@ public:
         LOCK lock(another.m_mtx);
         Node *node_act = another.m_pRoot;
         for (; node_act; node_act = node_act->GetNext())
-            this->push_back(node_act->GetValue(), node_act->GetRef());
+            this->Insert(node_act->GetValue(), node_act->GetRef());
     }
     //move contructor
     CLinkedList(CLinkedList &&another) noexcept{
@@ -166,7 +168,7 @@ private:
                     stringstream(line.substr(pos + 1, _value - pos - 1))       >> val;
                     stringstream(line.substr(_value + 1, _refer - _value - 1)) >> ref;
                     
-                    container.push_back(val, ref);
+                    container.Insert(val, ref);
                     pos = _refer;
                     }
                 } break;
@@ -178,7 +180,7 @@ private:
 
 template <typename Traits>
 void CLinkedList<Traits>::push_back(const value_type &val, ref_type ref){
-    LOCK lock(m_mtx);
+    std::lock_guard<std::mutex> lock(m_mtx);
     Node *pNewNode = new Node(val, ref);
     if( !m_pRoot )
         m_pRoot = pNewNode;
@@ -190,7 +192,7 @@ void CLinkedList<Traits>::push_back(const value_type &val, ref_type ref){
 
 template <typename Traits>
 void CLinkedList<Traits>::InternalInsert(Node *&rParent, const value_type &val, ref_type ref){
-    if( !rParent || rParent->GetValue() > val ){
+    if( !rParent || Compare()(rParent->GetValue(), val) ){
         Node *pNew = new Node(val, ref, rParent);
         rParent = pNew;
         if (pNew->GetNext() == nullptr) m_pLast = pNew;
@@ -202,7 +204,7 @@ void CLinkedList<Traits>::InternalInsert(Node *&rParent, const value_type &val, 
 
 template <typename Traits>
 void CLinkedList<Traits>::Insert(const value_type &val, ref_type ref){
-    LOCK lock(m_mtx);
+    std::lock_guard<std::mutex> lock(m_mtx);
     InternalInsert(m_pRoot, val, ref);
 }
 
