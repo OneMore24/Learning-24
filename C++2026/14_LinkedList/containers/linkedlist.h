@@ -133,14 +133,14 @@ public:
 
     void    push_back (const value_type &val, ref_type ref);
     void    Insert    (const value_type &val, ref_type ref);
-    size_t  getSize() { return m_nElements;  }
+    size_t  getSize() { LOCK lock(m_mtx); return m_nElements;  }
 
 private:
     void InternalInsert(Node *&rParent, const value_type &val, ref_type ref);
     //persistencia write
     friend ostream &operator<<(ostream &os, CLinkedList<Traits> &container){
         LOCK lock(container.m_mtx);
-        os << "CLinkedList: size = " << container.getSize() << endl;
+        os << "CLinkedList: size = " << container.m_nElements << endl;
         os << "[";
         Node *node_act = container.m_pRoot;
         for (;node_act; node_act = node_act->GetNext()){
@@ -193,6 +193,7 @@ void CLinkedList<Traits>::InternalInsert(Node *&rParent, const value_type &val, 
     if( !rParent || rParent->GetValue() > val ){
         Node *pNew = new Node(val, ref, rParent);
         rParent = pNew;
+        if (pNew->GetNext() == nullptr) m_pLast = pNew;
         ++m_nElements;
         return;
     }
