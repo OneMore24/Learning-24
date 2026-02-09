@@ -168,7 +168,7 @@ private:
                     stringstream(line.substr(pos + 1, _value - pos - 1))       >> val;
                     stringstream(line.substr(_value + 1, _refer - _value - 1)) >> ref;
                     
-                    container.Insert(val, ref);
+                    container.push_back(val, ref);
                     pos = _refer;
                     }
                 } break;
