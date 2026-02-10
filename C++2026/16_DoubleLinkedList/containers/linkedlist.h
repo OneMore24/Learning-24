@@ -23,16 +23,16 @@ struct DescendingTrait : public ListTrait<T, std::less<T> >{};
 
 //iterator
 template <typename Container>
-class LinkedListIterator : public GeneralIterator<Container>{
+class ForwardLinkedListIterator : public GeneralIterator<Container>{
     using Parent = GeneralIterator<Container>;
     using Node   = typename Container::Node;
 public:
-    LinkedListIterator(Container *pContainer, Node *pNode)
+    ForwardLinkedListIterator(Container *pContainer, Node *pNode)
                       : Parent(pContainer, pNode){}
-    LinkedListIterator(const LinkedListIterator<Container> &another)
+    ForwardLinkedListIterator(const ForwardLinkedListIterator<Container> &another)
                       : Parent(another){}
 
-    LinkedListIterator<Container> &operator++(){
+    ForwardLinkedListIterator<Container> &operator++(){
         if(Parent::m_pNode){
             Parent::m_pNode = Parent::m_pNode->GetNext();
             if (Parent::m_pNode == Parent::m_pContainer->m_pRoot)
@@ -40,8 +40,8 @@ public:
         }    
         return *this;
     }
-    LinkedListIterator operator+(size_t n) const {
-        LinkedListIterator temp = *this;
+    ForwardLinkedListIterator operator+(size_t n) const {
+        ForwardLinkedListIterator temp = *this;
         for (size_t i=0; i<n && temp.m_pNode; ++i) {
             temp.m_pNode = temp.m_pNode->GetNext();
             if (temp.m_pNode == Parent::m_pContainer->m_pRoot)
@@ -51,6 +51,34 @@ public:
     }
 };
 
+template <typename Container>
+class BackwardLinkedListIterator : public GeneralIterator<Container>{
+    using Parent = GeneralIterator<Container>;
+    using Node   = typename Container::Node;
+public:
+    BackwardLinkedListIterator(Container *pContainer, Node *pNode)
+                      : Parent(pContainer, pNode){}
+    BackwardLinkedListIterator(const BackwardLinkedListIterator<Container> &another)
+                      : Parent(another){}
+
+    BackwardLinkedListIterator<Container> &operator++(){
+        if(Parent::m_pNode){
+            Parent::m_pNode = Parent::m_pNode->GetPrev();
+            if (Parent::m_pNode == Parent::m_pContainer->m_pLast)
+                Parent::m_pNode = nullptr;
+        }    
+        return *this;
+    }
+    BackwardLinkedListIterator operator+(size_t n) const {
+        BackwardLinkedListIterator temp = *this;
+        for (size_t i=0; i<n && temp.m_pNode; ++i) {
+            temp.m_pNode = temp.m_pNode->GetPrev();
+            if (temp.m_pNode == Parent::m_pContainer->m_pLast)
+                temp.m_pNode = nullptr;
+        }
+        return temp;
+    }
+};
 // nodo
 template <typename Traits>
 class NodeLinkedList{
@@ -61,11 +89,13 @@ private:
     value_type m_data;
     ref_type   m_ref;
     Node *m_pNext = nullptr;
+    Node *m_pPrev = nullptr;
 
 public:
     NodeLinkedList(){}
-    NodeLinkedList( value_type _value, ref_type _ref = -1, Node *_pNext = nullptr)
-                  : m_data(_value), m_ref(_ref), m_pNext(_pNext){   }
+    NodeLinkedList( value_type _value, ref_type _ref = -1, Node *_pNext = nullptr, Node *_pPrev = nullptr)
+                  : m_data(_value), m_ref(_ref), m_pNext(_pNext), m_pPrev(_pPrev){   }
+
     value_type  GetValue   () const { return m_data; }
     value_type &GetValueRef() { return m_data; }
 
@@ -74,6 +104,9 @@ public:
 
     Node      * GetNext     () const { return m_pNext;   }
     Node      *&GetNextRef  () { return m_pNext;   }
+
+    Node      * GetPrev     () const { return m_pPrev; }
+    Node      *&GetPrevRef  () { return m_pPrev; }
 
     Node &operator=(const Node &another){
         m_data = another.GetValue();
@@ -92,9 +125,11 @@ class CLinkedList {
     using  value_type       = typename Traits::value_type;
     using Compare           = typename Traits::Func;
     using  Node             = NodeLinkedList<Traits>;
-    using forward_iterator  = LinkedListIterator <CLinkedList <Traits> >;
+    using forward_iterator  = ForwardLinkedListIterator <CLinkedList <Traits> >;
+    using backward_iterator = BackwardLinkedListIterator <CLinkedList <Traits> >;
     
     friend forward_iterator;
+    friend backward_iterator;
     friend GeneralIterator< CLinkedList<Traits> >;
 
     Node *m_pRoot      = nullptr;
@@ -138,6 +173,8 @@ public:
     //iteradores
     forward_iterator begin() { return forward_iterator(this, m_pRoot); }
     forward_iterator end()   { return forward_iterator(this, nullptr); }
+    backward_iterator rbegin() { return backward_iterator(this, m_pLast); }
+    backward_iterator rend()   { return backward_iterator(this, nullptr); }
     //operador de acceso
     value_type &operator[](size_t index){
         LOCK lock(m_mtx);
@@ -153,7 +190,7 @@ public:
     size_t  getSize() { LOCK lock(m_mtx); return m_nElements;  }
 
 private:
-    void InternalInsert(Node *&rParent, const value_type &val, ref_type ref);
+    void InternalInsert(Node *&rParent, Node *pPrev, const value_type &val, ref_type ref);
     //persistencia write
     friend ostream &operator<<(ostream &os, CLinkedList<Traits> &container){
         LOCK lock(container.m_mtx);
@@ -200,33 +237,40 @@ void CLinkedList<Traits>::push_back(const value_type &val, ref_type ref){
     Node *pNewNode = new Node(val, ref);
     if( !m_pRoot ) {
         m_pRoot = pNewNode;
-        pNewNode->GetNextRef() = m_pRoot;
+        pNewNode->GetNextRef() = pNewNode->GetPrevRef() = m_pRoot;
     } else {
-        m_pLast->GetNextRef() = pNewNode;
         pNewNode->GetNextRef() = m_pRoot;
+        pNewNode->GetPrevRef() = m_pLast;
+        m_pLast->GetNextRef() = pNewNode;
+        m_pRoot->GetPrevRef() = pNewNode;
         }
     m_pLast = pNewNode;
     ++m_nElements;
 }
 
 template <typename Traits>
-void CLinkedList<Traits>::InternalInsert(Node *&rParent, const value_type &val, ref_type ref){
+void CLinkedList<Traits>::InternalInsert(Node *&rParent, Node *pPrev, const value_type &val, ref_type ref) {
     if( !rParent || Compare()(rParent->GetValue(), val) ){
-        Node *pNew = new Node(val, ref, rParent);
+        Node *pNew = new Node(val, ref, rParent, pPrev);
+        if (rParent) rParent->GetPrevRef() = pNew;
         rParent = pNew;
         if (pNew->GetNext() == nullptr) m_pLast = pNew;
         ++m_nElements;
         return;
     }
-    InternalInsert(rParent->GetNextRef(), val, ref);
+    InternalInsert(rParent->GetNextRef(), rParent, val, ref);
 }
 
 template <typename Traits>
 void CLinkedList<Traits>::Insert(const value_type &val, ref_type ref){
     std::lock_guard<std::mutex> lock(m_mtx);
     if (m_pLast) m_pLast->GetNextRef() = nullptr;
-    InternalInsert(m_pRoot, val, ref);
-    if (m_pLast) m_pLast->GetNextRef() = m_pRoot;
+    if (m_pRoot) m_pRoot->GetPrevRef() = nullptr;
+    InternalInsert(m_pRoot, nullptr, val, ref);
+    if (m_pLast && m_pRoot) {
+        m_pLast->GetNextRef() = m_pRoot;
+        m_pRoot->GetPrevRef() = m_pLast;
+    }
 }
 
 #endif // __LINKEDLIST_H__

@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./15_LinkeListCircular -I./containers -I./general
-TARGET = lcircular.exe
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./16_DoubleLinkedList -I./containers -I./general
+TARGET = ldoble.exe
 SRCS = main.cpp DemoLists.cpp
 OBJS = $(SRCS:.cpp=.o)
 

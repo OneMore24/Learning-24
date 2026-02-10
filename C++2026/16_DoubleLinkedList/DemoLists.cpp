@@ -11,6 +11,7 @@ using Tf = float;
 
 auto suma = [](auto &val, auto ...args) { val += (args + ...); };
 auto par  = [](auto &val)               { return val % 2 == 0; };
+auto imprimir = [](auto &val) { cout << val << " <-> "; };
 
 void DemoLists(){
     CLinkedList< AscendingTrait<T1> > l1;
@@ -49,12 +50,12 @@ void DemoLists(){
     cout << endl << "finish #4" << endl << endl;
 
     CLinkedList<AscendingTrait<T1>> l4(l3);
-    cout << "Copia:" << endl;
+    cout << "copia l3 -> l4" << endl;
     cout << l4;
     cout << "finish #5 contructor de copia" << endl << endl;
 
     CLinkedList<AscendingTrait<T1>> l5(std::move(l4));
-    cout << "Movida:" << endl;
+    cout << "movida l4 -> l5" << endl;
     cout << l4;
     cout << l5;
     cout << "finish #6 move constructor" << endl << endl;
@@ -63,4 +64,29 @@ void DemoLists(){
     if (it_ultimo.m_pNode->GetNext() == l3.begin().m_pNode)
         cout << "el ultimo apunta al primero. es circular." << endl;
     cout << "finish #7 linkedlistcircular" << endl << endl;
+
+    CLinkedList<AscendingTrait<T1>> l_doble;
+    l_doble.Insert(10, 1);
+    l_doble.Insert(24, 2);
+    l_doble.Insert(6, 3);
+    l_doble.push_back(15, 4);
+    cout << l_doble << endl;
+
+    Foreach(l_doble.begin(),  l_doble.end(),  imprimir);
+    cout << endl;
+    Foreach(l_doble.rbegin(), l_doble.rend(), imprimir);
+
+    auto it_inicio = l_doble.begin();
+    auto it_final  = l_doble.rbegin();
+
+    if (it_final.m_pNode->GetNext() == it_inicio.m_pNode)
+        cout << endl << "OK: " << *it_final << " apunta a " << *it_inicio << " (circular next)" << endl;
+    if (it_inicio.m_pNode->GetPrev() == it_final.m_pNode)
+        cout << "OK: " << *it_inicio << " apunta a " << *it_final << " (circular prev)" << endl;
+    cout << "finish #8 double linkedlist circular" << endl << endl;
+
+    auto first_par_rev = FirstThat(l_doble.rbegin(), l_doble.rend(), par);
+    if (first_par_rev != l_doble.rend())
+        cout << "primer numero par encontrado desde el final: " << *first_par_rev << endl;
+    cout << "finish #9 foreach reverse" << endl;
 }
