@@ -25,6 +25,8 @@ void DemoLists(){
     
     cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl;
     cout << "size     = " << queue.size() << endl;
+
+    cout << "finish #1 - queue + dequeue\n" << endl;
     
     queue.enqueue(50, 5);
     queue.enqueue(60, 6);
@@ -32,7 +34,8 @@ void DemoLists(){
     
     cout << "\nvaciando queue:" << endl;
     while(!queue.isEmpty()){ cout << "dequeue() = " << queue.dequeue() << endl; }
-    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl << endl;
+    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl;
+    cout << "finish #2 - empty queue\n" << endl;
     
     CHeap<AscendingTrait<T1>> heap;
     heap.insert(10, 1);
@@ -43,4 +46,5 @@ void DemoLists(){
     cout << "first        = " << heap.first()        << endl;
     cout << "extractFirst = " << heap.extractFirst() << endl;
     cout << heap;
+    cout << "finish #3 - push + extractheap\n" << endl;
 }
