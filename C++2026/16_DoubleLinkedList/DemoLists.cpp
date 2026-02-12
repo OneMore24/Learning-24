@@ -3,6 +3,7 @@
 #include <iterator>
 #include "containers/lists.h"
 #include "foreach.h"
+#include "containers/traits.h"
 
 using namespace std;
 
@@ -65,7 +66,7 @@ void DemoLists(){
         cout << "el ultimo apunta al primero. es circular." << endl;
     cout << "finish #7 linkedlistcircular" << endl << endl;
 
-    CLinkedList<AscendingTrait<T1>> l_doble;
+    CDoubleLinkedList<AscendingTrait<T1>> l_doble;
     l_doble.Insert(10, 1);
     l_doble.Insert(24, 2);
     l_doble.Insert(6, 3);
