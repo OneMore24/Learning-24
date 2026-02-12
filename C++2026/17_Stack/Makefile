@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./16_DoubleLinkedList -I./containers -I./general
-TARGET = ldoble.exe
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./17_Stack -I./containers -I./general
+TARGET = stack.exe
 SRCS = main.cpp DemoLists.cpp
 OBJS = $(SRCS:.cpp=.o)
 

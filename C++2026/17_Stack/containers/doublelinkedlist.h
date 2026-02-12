@@ -178,9 +178,24 @@ public:
         throw out_of_range("no existe index");
     }
 
+    //operator =
+    CDoubleLinkedList &operator=(CDoubleLinkedList &&another) noexcept{
+    if (this != &another) {
+        this->~CDoubleLinkedList();
+        m_pRoot     = another.m_pRoot;
+        m_pLast     = another.m_pLast;
+        m_nElements = another.m_nElements;
+        another.m_pRoot     = nullptr;
+        another.m_pLast     = nullptr;
+        another.m_nElements = 0;
+        }
+        return *this;
+    }
+
     void    push_back (const value_type &val, ref_type ref);
     void    Insert    (const value_type &val, ref_type ref);
-    size_t  getSize() { LOCK lock(m_mtx); return m_nElements;  }
+    size_t  getSize() const { LOCK lock(m_mtx); return m_nElements;  }
+    void    pop_back();
 
 private:
     void InternalInsert(Node *&rParent, Node *pPrev, const value_type &val, ref_type ref);
@@ -264,6 +279,21 @@ void CDoubleLinkedList<Traits>::Insert(const value_type &val, ref_type ref){
         m_pLast->GetNextRef() = m_pRoot;
         m_pRoot->GetPrevRef() = m_pLast;
     }
+}
+
+template <typename Traits>
+void CDoubleLinkedList<Traits>::pop_back() {
+    std::lock_guard<std::mutex> lock(m_mtx);
+    if (!m_pRoot) return;
+    Node* pDelete = m_pLast;
+    if (m_nElements == 1) { m_pRoot = m_pLast = nullptr; } 
+    else {
+        m_pLast = m_pLast->GetPrev();
+        m_pLast->GetNextRef() = m_pRoot;
+        m_pRoot->GetPrevRef() = m_pLast;
+    }
+    delete pDelete;
+    --m_nElements;
 }
 
 #endif // __DOUBLE_LINKED_LIST_H__

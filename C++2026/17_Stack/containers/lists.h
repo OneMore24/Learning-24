@@ -3,6 +3,7 @@
 #include "../general/types.h"
 #include "doublelinkedlist.h"
 #include "linkedlist.h"
+#include "stack.h"
 
 void DemoLists();
 
