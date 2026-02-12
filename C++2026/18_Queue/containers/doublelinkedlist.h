@@ -155,6 +155,7 @@ public:
     //destructor
     virtual ~CDoubleLinkedList(){
         if (m_pLast) m_pLast->GetNextRef() = nullptr;
+        if (m_pRoot) m_pRoot->GetPrevRef() = nullptr;
         Node *node_act = m_pRoot;
         for(;node_act;){
             Node *node_next = node_act->GetNext();

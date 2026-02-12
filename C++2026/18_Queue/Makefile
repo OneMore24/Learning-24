@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./17_Stack -I./containers -I./general
-TARGET = stack.exe
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./18_Queue -I./containers -I./general
+TARGET = queue.exe
 SRCS = main.cpp DemoLists.cpp
 OBJS = $(SRCS:.cpp=.o)
 

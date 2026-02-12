@@ -4,6 +4,8 @@
 #include "doublelinkedlist.h"
 #include "linkedlist.h"
 #include "stack.h"
+#include "heap.h"
+#include "queue.h"
 
 void DemoLists();
 

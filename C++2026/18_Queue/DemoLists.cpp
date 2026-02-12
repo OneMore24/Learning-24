@@ -10,29 +10,37 @@ using namespace std;
 using T1 = int;
 
 void DemoLists(){
-    CStack<AscendingTrait<T1>> stack;
+    CQueue<AscendingTrait<T1>> queue;
+    
+    queue.enqueue(10, 1);
+    queue.enqueue(20, 2);
+    queue.enqueue(30, 3);
+    queue.enqueue(40, 4);
+    cout << queue;
 
-    stack.push(10, 1);
-    stack.push(20, 2);
-    stack.push(30, 3);
-    stack.push(40, 4);
-    cout << stack << endl;
-
-    cout << "top = " << stack.top() << " // 40" << endl;
-    cout << "pop = " << stack.pop() << " // -40" << endl;
-    cout << "pop = " << stack.pop() << " // .30" << endl;
-    cout << "isEmpty? = " << (stack.isEmpty() ? "true" : "false") << endl;
-    cout << stack;
-    cout << "finish #1 - push + top and pop\n" << endl;
-
-    stack.push(50, 5);
-    stack.push(60, 6);
-    cout << stack;
-    cout << "finish #2 - push\n" << endl;
-
-    cout << "vaciar stack:" << endl;
-    for(;!stack.isEmpty();){ cout << "pop() = " << stack.pop() << endl; }
-    // stack.pop(); //vacio
-    cout << "isEmpty? = " << (stack.isEmpty() ? "true" : "false") << endl;
-    cout << "finish #3 - empty\n" << endl;
+    cout << "front =    " << queue.front()   << " //  10" << endl;
+    cout << "dequeue =  " << queue.dequeue() << " // -10" << endl;
+    cout << "dequeue =  " << queue.dequeue() << " // -20" << endl;
+    cout << queue;
+    
+    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl;
+    cout << "size     = " << queue.size() << endl;
+    
+    queue.enqueue(50, 5);
+    queue.enqueue(60, 6);
+    cout << queue;
+    
+    cout << "\nvaciando queue:" << endl;
+    while(!queue.isEmpty()){ cout << "dequeue() = " << queue.dequeue() << endl; }
+    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl << endl;
+    
+    CHeap<AscendingTrait<T1>> heap;
+    heap.insert(10, 1);
+    heap.insert(20, 2);
+    heap.insert(30, 3);
+    cout << heap;
+    
+    cout << "first        = " << heap.first()        << endl;
+    cout << "extractFirst = " << heap.extractFirst() << endl;
+    cout << heap;
 }
