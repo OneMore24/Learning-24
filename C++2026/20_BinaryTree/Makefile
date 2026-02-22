@@ -1,7 +1,7 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -I./19_Heap -I./containers -I./general
-TARGET = heap.exe
-SRCS = main.cpp DemoLists.cpp
+CXXFLAGS = -Wall -Wextra -std=c++17 -I./20_BinaryTree -I./containers -I./general
+TARGET = binarytree.exe
+SRCS = main.cpp Demos.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)

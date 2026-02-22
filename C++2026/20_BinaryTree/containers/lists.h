@@ -7,6 +7,6 @@
 #include "heap.h"
 #include "queue.h"
 
-void DemoLists();
+void Demos();
 
 #endif // __LISTS_H__

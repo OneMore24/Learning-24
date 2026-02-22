@@ -3,6 +3,6 @@
 
 int main() {
     std::cout << "Hello!" << std::endl;
-    DemoLists();
+    Demos();
     return 0;
 }
