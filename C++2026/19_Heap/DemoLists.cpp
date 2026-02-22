@@ -1,50 +1,68 @@
 #include <iostream>
-#include <fstream>
-#include <iterator>
-#include "containers/lists.h"
-#include "foreach.h"
+#include "containers/heap.h"
 #include "containers/traits.h"
+#include "general/types.h"
 
 using namespace std;
 
-using T1 = int;
+void DemoLists() {
+    //datos de prueba
+    T1 datos[]      = {45, 12, 89, 33, 5, 76, 21, 99, 1, 64, 70, 85, 14, 2, 17};
+    auto numDatos   = sizeof(datos) / sizeof(datos[0]);
 
-void DemoLists(){
-    CQueue<AscendingTrait<T1>> queue;
+    //MinHeap
+    cout << "*** MinHeap : DescendingTrait ***" << endl;
     
-    queue.enqueue(10, 1);
-    queue.enqueue(20, 2);
-    queue.enqueue(30, 3);
-    queue.enqueue(40, 4);
-    cout << queue;
+    CHeap<DescendingTrait<T1>> minHeap; 
+    
+    cout << "1. push datos ..." << endl;
+    for (size_t i=0; i<numDatos; ++i) { minHeap.push(datos[i], i); }
+    cout << "MinHeap : " << minHeap << "\n";
+    cout << "SizeHeap: " << minHeap.size() << endl;
 
-    cout << "front =    " << queue.front()   << " //  10" << endl;
-    cout << "dequeue =  " << queue.dequeue() << " // -10" << endl;
-    cout << "dequeue =  " << queue.dequeue() << " // -20" << endl;
-    cout << queue;
-    
-    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl;
-    cout << "size     = " << queue.size() << endl;
+    cout << "\n2. pop raiz ..." << endl;
+    if (!minHeap.isEmpty()) {
+        auto valor = minHeap.top(); 
+        minHeap.pop();
+        cout << " -> extraido: "        << valor 
+            << " | quedan: "            << minHeap.size() 
+            << " | arreglo parcial : "   << minHeap << endl;
+    }
 
-    cout << "finish #1 - queue + dequeue\n" << endl;
+    T1 valExtracc = 33;
+    cout << "\nextraer: " << valExtracc << "..." << endl;
     
-    queue.enqueue(50, 5);
-    queue.enqueue(60, 6);
-    cout << queue;
+    bool exito = minHeap.remove(valExtracc);
+
+    if (exito) { cout << "nuevo heap: " << minHeap << endl; } 
+        else { cout << "-> error: " << valExtracc << " no esta en el heap" << endl; }
+    cout << "\n";
+
+    //MaxHeap
+    cout << "*** MaxHeap : AscendingTrait ***" << endl;
     
-    cout << "\nvaciando queue:" << endl;
-    while(!queue.isEmpty()){ cout << "dequeue() = " << queue.dequeue() << endl; }
-    cout << "isEmpty? = " << (queue.isEmpty() ? "true" : "false") << endl;
-    cout << "finish #2 - empty queue\n" << endl;
+    CHeap<AscendingTrait<T1>> maxHeap; 
     
-    CHeap<AscendingTrait<T1>> heap;
-    heap.insert(10, 1);
-    heap.insert(20, 2);
-    heap.insert(30, 3);
-    cout << heap;
+    cout << "1. push datos ..." << endl;
+    for (size_t i=0; i<numDatos; ++i) { maxHeap.push(datos[i], i); }
+    cout << "MaxHeap: " << maxHeap << "\n";
+    cout << "SizeHeap: " << maxHeap.size() << endl;
+
+    cout << "\n2. pop raiz ..." << endl;
+    if (!maxHeap.isEmpty()) {
+        auto valor = maxHeap.top(); 
+        maxHeap.pop();
+        cout << " -> extraido: " << valor 
+            << " | quedan: " << maxHeap.size() 
+            << " | arreglo parcial: " << maxHeap << endl;
+    }
+
+    valExtracc = 17;
+    cout << "\nextraer: " << valExtracc << "..." << endl;
     
-    cout << "first        = " << heap.first()        << endl;
-    cout << "extractFirst = " << heap.extractFirst() << endl;
-    cout << heap;
-    cout << "finish #3 - push + extractheap\n" << endl;
+    exito = maxHeap.remove(valExtracc);
+
+    if (exito) { cout << "nuevo heap: " << maxHeap << endl; } 
+        else { cout << "-> error: " << valExtracc << " no esta en el heap" << endl; }
+    cout << "\n";
 }
