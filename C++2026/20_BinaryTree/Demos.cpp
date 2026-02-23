@@ -1,68 +1,79 @@
 #include <iostream>
-#include "containers/heap.h"
-#include "containers/traits.h"
-#include "general/types.h"
+#include <string>
+#include "../containers/binarytree.h"
+#include "../containers/traits.h"
+#include "../general/types.h"
 
 using namespace std;
 
-void DemoLists() {
+// Funcion Helper para probar los recorridos Variadic
+void ImprimirVariadic(T1 valor, string prefijo, string sufijo) {
+    cout << prefijo << valor << sufijo;
+}
+
+void Demos() {
     //datos de prueba
-    T1 datos[]      = {45, 12, 89, 33, 5, 76, 21, 99, 1, 64, 70, 85, 14, 2, 17};
+    T1 datos[]      = {45, 12, 89, 33, 5, 76, 21, 99, 1, 64, 70, 85, 14, 2, 150, 35, 92, 17, 86, 33, 19};
     auto numDatos   = sizeof(datos) / sizeof(datos[0]);
 
-    //MinHeap
-    cout << "*** MinHeap : DescendingTrait ***" << endl;
+    //AVL Ascending (menor a mayor)
+    cout << "*** AVL Tree : TreeTraitAscending ***" << endl;
     
-    CHeap<DescendingTrait<T1>> minHeap; 
+    CBinaryTree<TreeTraitAscending<T1>> ascTree; 
     
-    cout << "1. push datos ..." << endl;
-    for (size_t i=0; i<numDatos; ++i) { minHeap.push(datos[i], i); }
-    cout << "MinHeap : " << minHeap << "\n";
-    cout << "SizeHeap: " << minHeap.size() << endl;
+    cout << "1. push datos (Insert) ..." << endl;
+    for (size_t i=0; i<numDatos; ++i) { ascTree.Insert(datos[i], i); }
 
-    cout << "\n2. pop raiz ..." << endl;
-    if (!minHeap.isEmpty()) {
-        auto valor = minHeap.top(); 
-        minHeap.pop();
-        cout << " -> extraido: "        << valor 
-            << " | quedan: "            << minHeap.size() 
-            << " | arreglo parcial : "   << minHeap << endl;
+    cout << "AscTree : \n" << ascTree << "\n";
+    cout << "SizeTree: " << ascTree.size() << endl;
+
+    cout << "\n2. Forward Iterator (begin a end) ..." << endl;
+    cout << " -> ";
+    for (auto it = ascTree.begin(); it != ascTree.end(); ++it) {
+        cout << *it << " ";
     }
-
-    T1 valExtracc = 33;
-    cout << "\nextraer: " << valExtracc << "..." << endl;
-    
-    bool exito = minHeap.remove(valExtracc);
-
-    if (exito) { cout << "nuevo heap: " << minHeap << endl; } 
-        else { cout << "-> error: " << valExtracc << " no esta en el heap" << endl; }
     cout << "\n";
 
-    //MaxHeap
-    cout << "*** MaxHeap : AscendingTrait ***" << endl;
-    
-    CHeap<AscendingTrait<T1>> maxHeap; 
-    
-    cout << "1. push datos ..." << endl;
-    for (size_t i=0; i<numDatos; ++i) { maxHeap.push(datos[i], i); }
-    cout << "MaxHeap: " << maxHeap << "\n";
-    cout << "SizeHeap: " << maxHeap.size() << endl;
-
-    cout << "\n2. pop raiz ..." << endl;
-    if (!maxHeap.isEmpty()) {
-        auto valor = maxHeap.top(); 
-        maxHeap.pop();
-        cout << " -> extraido: " << valor 
-            << " | quedan: " << maxHeap.size() 
-            << " | arreglo parcial: " << maxHeap << endl;
+    cout << "\n3. Backward Iterator (rbegin a rend) ..." << endl;
+    cout << " -> ";
+    for (auto it = ascTree.rbegin(); it != ascTree.rend(); ++it) {
+        cout << *it << " ";
     }
+    cout << "\n";
 
-    valExtracc = 17;
-    cout << "\nextraer: " << valExtracc << "..." << endl;
+    cout << "\n4. Recorridos Variadic ..." << endl;
+    cout << " -> InOrder  : ";
+    ascTree.InOrder(ImprimirVariadic, "[", "] ");
+    cout << "\n -> PreOrder : ";
+    ascTree.PreOrder(ImprimirVariadic, "", ", ");
+    cout << "\n -> PostOrder: ";
+    ascTree.PostOrder(ImprimirVariadic, "<", "> ");
+    cout << "\n";
+
+    T1 valExtracc = 33;
+    cout << "\n5. extraer: " << valExtracc << "..." << endl;
+    ascTree.remove(valExtracc); // Borrará la primera coincidencia
     
-    exito = maxHeap.remove(valExtracc);
+    cout << "nuevo arbol: \n" << ascTree << endl;
+    cout << "SizeTree: " << ascTree.size() << endl;
+    cout << "\n";
 
-    if (exito) { cout << "nuevo heap: " << maxHeap << endl; } 
-        else { cout << "-> error: " << valExtracc << " no esta en el heap" << endl; }
+    //AVL Descending (mayor a menor)
+    cout << "*** AVL Tree : TreeTraitDescending ***" << endl;
+    
+    CBinaryTree<TreeTraitDescending<T1>> descTree; 
+    
+    cout << "1. push datos (Insert) ..." << endl;
+    for (size_t i=0; i<numDatos; ++i) { descTree.Insert(datos[i], i); }
+
+    cout << "DescTree : \n" << descTree << "\n";
+    cout << "SizeTree: " << descTree.size() << endl;
+
+    valExtracc = 12;
+    cout << "\n2. extraer: " << valExtracc << "..." << endl;
+    descTree.remove(valExtracc);
+    
+    cout << "nuevo arbol: \n" << descTree << endl;
+    cout << "SizeTree: " << descTree.size() << endl;
     cout << "\n";
 }
